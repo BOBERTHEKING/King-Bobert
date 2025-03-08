@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Remake</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .hidden { display: none; }
+        #music-list { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h2>Welcome to Spotify Remake</h2>
+        <input type="file" id="fileInput" accept="audio/*">
+        <button onclick="uploadAudio()">Upload</button>
+        <ul id="music-list"></ul>
+        <audio id="audioPlayer" controls></audio>
+    </div>
+
+    <script>
+        const backendURL = "https://your-render-url.com"; // Replace with Render URL
+
+        async function uploadAudio() {
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const formData = new FormData();
+                formData.append('audio', file);
+
+                const response = await fetch(`${backendURL}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const audioData = await response.json();
+                displayMusicList();
+            }
+        }
+
+        async function displayMusicList() {
+            const response = await fetch(`${backendURL}/music`);
+            const musicList = await response.json();
+
+            const listElement = document.getElementById('music-list');
+            listElement.innerHTML = '';
+
+            musicList.forEach(audio => {
+                const listItem = document.createElement('li');
+                listItem.textContent = audio.name;
+                listItem.onclick = () => playAudio(audio.url);
+                listElement.appendChild(listItem);
+            });
+        }
+
+        function playAudio(url) {
+            const player = document.getElementById('audioPlayer');
+            player.src = url;
+            player.play();
+        }
+
+        window.onload = displayMusicList;
+    </script>
+</body>
+</html>
